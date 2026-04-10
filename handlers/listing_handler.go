@@ -18,16 +18,15 @@ func CreateListing(c *gin.Context) {
 		return
 	}
 
+	userID, _ := c.Get("user_id")
+	newListing.UserID = userID.(uint)
+
 	if newListing.Title == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Title is required"})
 		return
 	}
 	if newListing.Price < 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Price cannot be negative"})
-		return
-	}
-	if newListing.UserID == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "user_id is required"})
 		return
 	}
 	if newListing.CategoryID == 0 {
