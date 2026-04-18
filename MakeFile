@@ -1,0 +1,24 @@
+DB_URL=postgres://postgres:postgres@localhost:5432/marketplace?sslmode=disable
+MIGRATIONS_PATH=db/migrations
+MIGRATE=C:/Users/yernur/go/bin/migrate.exe
+
+run:
+	go run main.go
+
+migrate-up:
+	$(MIGRATE) -path $(MIGRATIONS_PATH) -database "$(DB_URL)" up
+
+migrate-down:
+	$(MIGRATE) -path $(MIGRATIONS_PATH) -database "$(DB_URL)" down 1
+
+migrate-down-all:
+	$(MIGRATE) -path $(MIGRATIONS_PATH) -database "$(DB_URL)" down
+
+migrate-version:
+	$(MIGRATE) -path $(MIGRATIONS_PATH) -database "$(DB_URL)" version
+
+migrate-force:
+	$(MIGRATE) -path $(MIGRATIONS_PATH) -database "$(DB_URL)" force $(version)
+
+migrate-create:
+	$(MIGRATE) create -ext sql -dir $(MIGRATIONS_PATH) $(name)

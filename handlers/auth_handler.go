@@ -13,8 +13,13 @@ import (
 
 var JwtSecret = []byte("secret")
 
+type loginRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
 func Login(c *gin.Context) {
-	var input models.User
+	var input loginRequest
 
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
@@ -28,7 +33,7 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(input.PasswordHash))
+	err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(input.Password))
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email or password"})
 		return
