@@ -1,24 +1,20 @@
-package main
+package handlers
 
 import (
+	"Marketplace-API/models"
 	"encoding/json"
 	"fmt"
 	"log"
-	"time"
+
+	"github.com/gin-gonic/gin"
+	"net/http"
 
 	"github.com/go-resty/resty/v2"
 )
 
-type ReviewResponse struct {
-	ID        uint      `json:"id"`
-	ListingID uint      `json:"listing_id"`
-	Author    string    `json:"author"`
-	Rating    int       `json:"rating"`
-	Comment   string    `json:"comment"`
-	CreatedAt time.Time `json:"created_at"`
-}
+func GetReviewsByListingID(c *gin.Context) {
+	id := c.GetUint("listing_id")
 
-func GetReviewsByListingID(id uint) ([]ReviewResponse, error) {
 	client := resty.New()
 
 	client.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
@@ -36,13 +32,15 @@ func GetReviewsByListingID(id uint) ([]ReviewResponse, error) {
 		Get(fmt.Sprintf("http://review-service:8081/reviews?listing_id=%d", id))
 
 	if err != nil {
-		return nil, err
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
 	}
 
-	var reviews []ReviewResponse
+	var reviews []models.ReviewResponse
 	if err := json.Unmarshal(resp.Body(), &reviews); err != nil {
-		return nil, err
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
 	}
 
-	return reviews, nil
+	c.JSON(http.StatusOK, reviews)
 }
