@@ -1,0 +1,197 @@
+{
+  "info": {
+    "name": "Marketplace API — Practicum 12",
+    "_postman_id": "practicum-12-collection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:8080" },
+    { "key": "review_url", "value": "http://localhost:8081" },
+    { "key": "token", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/api/register", "host": ["{{base_url}}"], "path": ["api", "register"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Arman\",\n  \"email\": \"arman@example.com\",\n  \"phone\": \"+77001234567\",\n  \"password\": \"secret123\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.token) { pm.collectionVariables.set('token', json.token); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/api/login", "host": ["{{base_url}}"], "path": ["api", "login"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"arman@example.com\",\n  \"password\": \"secret123\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Get User by ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/users/1", "host": ["{{base_url}}"], "path": ["api", "users", "1"] }
+          }
+        },
+        {
+          "name": "Get User Listings",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/users/1/listings", "host": ["{{base_url}}"], "path": ["api", "users", "1", "listings"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Categories",
+      "item": [
+        {
+          "name": "Get Categories",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/categories", "host": ["{{base_url}}"], "path": ["api", "categories"] }
+          }
+        },
+        {
+          "name": "Create Category (protected)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/categories", "host": ["{{base_url}}"], "path": ["api", "categories"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Electronics\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Listings",
+      "item": [
+        {
+          "name": "Get Listings",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/listings?page=1&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "listings"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "category_id", "value": "", "disabled": true },
+                { "key": "location", "value": "", "disabled": true },
+                { "key": "status", "value": "", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Listing by ID (with reviews)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/listings/1", "host": ["{{base_url}}"], "path": ["api", "listings", "1"] }
+          }
+        },
+        {
+          "name": "Create Listing (protected)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/listings", "host": ["{{base_url}}"], "path": ["api", "listings"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"iPhone 14\",\n  \"description\": \"Good condition\",\n  \"price\": 350000,\n  \"location\": \"Almaty\",\n  \"category_id\": 1\n}"
+            }
+          }
+        },
+        {
+          "name": "Update Listing (protected)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/listings/1", "host": ["{{base_url}}"], "path": ["api", "listings", "1"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"price\": 320000,\n  \"status\": \"active\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Listing (protected)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/api/listings/1", "host": ["{{base_url}}"], "path": ["api", "listings", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Review Service :8081",
+      "item": [
+        {
+          "name": "Get Reviews by Listing ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{review_url}}/reviews?listing_id=1",
+              "host": ["{{review_url}}"],
+              "path": ["reviews"],
+              "query": [{ "key": "listing_id", "value": "1" }]
+            }
+          }
+        },
+        {
+          "name": "Create Review",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{review_url}}/reviews", "host": ["{{review_url}}"], "path": ["reviews"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"listing_id\": 1,\n  \"author\": \"Arman\",\n  \"rating\": 5,\n  \"comment\": \"Great seller, fast delivery!\"\n}"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
