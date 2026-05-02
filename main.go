@@ -40,7 +40,7 @@ func main() {
 			return
 		}
 
-		reviews, err := GetReviewsByListingID(listing.ID)
+		reviews, err := handlers.GetReviewsByListingID(listing.ID)
 		if err != nil {
 			c.JSON(http.StatusOK, gin.H{"listing": listing, "reviews": []interface{}{}})
 			return

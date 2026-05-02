@@ -6,15 +6,10 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/gin-gonic/gin"
-	"net/http"
-
 	"github.com/go-resty/resty/v2"
 )
 
-func GetReviewsByListingID(c *gin.Context) {
-	id := c.GetUint("listing_id")
-
+func GetReviewsByListingID(id uint) ([]models.ReviewResponse, error) {
 	client := resty.New()
 
 	client.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
@@ -32,15 +27,13 @@ func GetReviewsByListingID(c *gin.Context) {
 		Get(fmt.Sprintf("http://review-service:8081/reviews?listing_id=%d", id))
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
+		return nil, err
 	}
 
 	var reviews []models.ReviewResponse
 	if err := json.Unmarshal(resp.Body(), &reviews); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
+		return nil, err
 	}
 
-	c.JSON(http.StatusOK, reviews)
+	return reviews, nil
 }
