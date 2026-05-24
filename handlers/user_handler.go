@@ -84,3 +84,46 @@ func GetUserListings(c *gin.Context) {
 		"total":    len(listings),
 	})
 }
+
+func GetMe(c *gin.Context) {
+	userID, _ := c.Get("user_id")
+
+	var user models.User
+	result := config.DB.First(&user, userID)
+	if result.Error != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, user)
+}
+
+func UpdateProfile(c *gin.Context) {
+	userID, _ := c.Get("user_id")
+
+	var user models.User
+	if err := config.DB.First(&user, userID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+
+	var input struct {
+		Name  string `json:"name"`
+		Phone string `json:"phone"`
+	}
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
+		return
+	}
+
+	if input.Name != "" {
+		user.Name = input.Name
+	}
+	if input.Phone != "" {
+		user.Phone = input.Phone
+	}
+
+	config.DB.Save(&user)
+	c.JSON(http.StatusOK, user)
+}

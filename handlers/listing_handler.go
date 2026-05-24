@@ -3,9 +3,13 @@ package handlers
 import (
 	"Marketplace-API/config"
 	"Marketplace-API/models"
+	"fmt"
 	"math"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -18,16 +22,15 @@ func CreateListing(c *gin.Context) {
 		return
 	}
 
+	userID, _ := c.Get("user_id")
+	newListing.UserID = userID.(uint)
+
 	if newListing.Title == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Title is required"})
 		return
 	}
 	if newListing.Price < 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Price cannot be negative"})
-		return
-	}
-	if newListing.UserID == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "user_id is required"})
 		return
 	}
 	if newListing.CategoryID == 0 {
@@ -164,4 +167,102 @@ func DeleteListing(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Listing deleted successfully"})
+}
+
+func SearchListings(c *gin.Context) {
+	q := c.Query("q")
+	if q == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Search query is required"})
+		return
+	}
+
+	var listings []models.Listing
+	search := "%" + q + "%"
+	result := config.DB.Preload("Category").
+		Where("LOWER(title) LIKE LOWER(?) OR LOWER(description) LIKE LOWER(?)", search, search).
+		Find(&listings)
+
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to search listings"})
+		return
+	}
+
+	c.JSON(http.StatusOK, listings)
+}
+
+func UpdateListingStatus(c *gin.Context) {
+	id := c.Param("id")
+
+	var listing models.Listing
+	if err := config.DB.First(&listing, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Listing not found"})
+		return
+	}
+
+	var input struct {
+		Status models.ListingStatus `json:"status" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Status is required"})
+		return
+	}
+
+	listing.Status = input.Status
+	config.DB.Save(&listing)
+
+	c.JSON(http.StatusOK, listing)
+}
+
+func GetRecentListings(c *gin.Context) {
+	var listings []models.Listing
+	result := config.DB.Preload("Category").
+		Where("status = ?", models.StatusActive).
+		Order("created_at DESC").
+		Limit(8).
+		Find(&listings)
+
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch listings"})
+		return
+	}
+
+	c.JSON(http.StatusOK, listings)
+}
+
+func UploadListingImage(c *gin.Context) {
+	id := c.Param("id")
+
+	var listing models.Listing
+	if err := config.DB.First(&listing, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Listing not found"})
+		return
+	}
+
+	userID, _ := c.Get("user_id")
+	if listing.UserID != userID.(uint) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Not your listing"})
+		return
+	}
+
+	file, err := c.FormFile("image")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "No image file provided"})
+		return
+	}
+
+	ext := filepath.Ext(file.Filename)
+	filename := fmt.Sprintf("%d_%d%s", listing.ID, time.Now().UnixNano(), ext)
+
+	os.MkdirAll("uploads", 0755)
+	dst := filepath.Join("uploads", filename)
+	if err := c.SaveUploadedFile(file, dst); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save image"})
+		return
+	}
+
+	listing.ImageURL = "/uploads/" + filename
+	config.DB.Save(&listing)
+
+	c.JSON(http.StatusOK, gin.H{"image_url": listing.ImageURL})
 }
