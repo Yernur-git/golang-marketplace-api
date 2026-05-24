@@ -1,6 +1,10 @@
 package models
 
-import "gorm.io/gorm"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
 
 type ListingStatus string
 
@@ -18,8 +22,10 @@ type Listing struct {
 	Price       float64       `json:"price"`
 	Status      ListingStatus `json:"status"      gorm:"default:'active'"`
 	Location    string        `json:"location"`
+	ImageURL    string        `json:"image_url"`
 	UserID      uint          `json:"user_id"`
 	User        User          `json:"user,omitempty"     gorm:"foreignKey:UserID"`
 	CategoryID  uint          `json:"category_id"`
 	Category    Category      `json:"category,omitempty" gorm:"foreignKey:CategoryID"`
+	CreatedAt   time.Time     `json:"created_at"`
 }

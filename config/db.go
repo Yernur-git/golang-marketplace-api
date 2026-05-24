@@ -10,6 +10,8 @@ import (
 
 var DB *gorm.DB
 
+var JwtSecret = []byte("secret")
+
 func ConnectDatabase() {
 	host := os.Getenv("DB_HOST")
 	if host == "" {

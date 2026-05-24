@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"Marketplace-API/handlers"
+	"Marketplace-API/config"
 	"net/http"
 	"strings"
 
@@ -21,7 +21,7 @@ func AuthMiddleware() gin.HandlerFunc {
 		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-			return handlers.JwtSecret, nil
+			return config.JwtSecret, nil
 		})
 
 		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {

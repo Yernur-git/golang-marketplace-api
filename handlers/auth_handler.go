@@ -11,8 +11,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-var JwtSecret = []byte("secret")
-
 type loginRequest struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
@@ -45,7 +43,7 @@ func Login(c *gin.Context) {
 		"exp":     time.Now().Add(time.Hour * 24).Unix(),
 	})
 
-	tokenString, _ := token.SignedString(JwtSecret)
+	tokenString, _ := token.SignedString(config.JwtSecret)
 
 	c.JSON(http.StatusOK, gin.H{
 		"token": tokenString,

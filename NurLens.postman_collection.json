@@ -1,0 +1,358 @@
+{
+	"info": {
+		"name": "NurLens Marketplace API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080"
+		},
+		{
+			"key": "review_url",
+			"value": "http://localhost:8081"
+		},
+		{
+			"key": "token",
+			"value": ""
+		}
+	],
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Register User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Arman Tester\",\n  \"email\": \"arman@example.com\",\n  \"phone\": \"+77012345678\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/register",
+							"host": ["{{base_url}}"],
+							"path": ["api", "register"]
+						}
+					}
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.token) {",
+									"    pm.collectionVariables.set('token', jsonData.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"arman@example.com\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/login",
+							"host": ["{{base_url}}"],
+							"path": ["api", "login"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "Get Current User (Me)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/me",
+							"host": ["{{base_url}}"],
+							"path": ["api", "me"]
+						}
+					}
+				},
+				{
+					"name": "Get User by ID",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/api/users/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "users", "1"]
+						}
+					}
+				},
+				{
+					"name": "Update Profile",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Authorization", "value": "Bearer {{token}}"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Arman Updated\",\n  \"phone\": \"+77019999999\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users/profile",
+							"host": ["{{base_url}}"],
+							"path": ["api", "users", "profile"]
+						}
+					}
+				},
+				{
+					"name": "Get User Listings",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/api/users/1/listings",
+							"host": ["{{base_url}}"],
+							"path": ["api", "users", "1", "listings"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Categories",
+			"item": [
+				{
+					"name": "Get All Categories",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/api/categories",
+							"host": ["{{base_url}}"],
+							"path": ["api", "categories"]
+						}
+					}
+				},
+				{
+					"name": "Get Category by ID",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/api/categories/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "categories", "1"]
+						}
+					}
+				},
+				{
+					"name": "Create Category",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Authorization", "value": "Bearer {{token}}"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Cameras\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/categories",
+							"host": ["{{base_url}}"],
+							"path": ["api", "categories"]
+						}
+					}
+				},
+				{
+					"name": "Get Category Listings",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/api/categories/1/listings",
+							"host": ["{{base_url}}"],
+							"path": ["api", "categories", "1", "listings"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Listings",
+			"item": [
+				{
+					"name": "Get All Listings",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/api/listings?page=1&limit=10",
+							"host": ["{{base_url}}"],
+							"path": ["api", "listings"],
+							"query": [
+								{"key": "page", "value": "1"},
+								{"key": "limit", "value": "10"}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Recent Listings",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/api/listings/recent",
+							"host": ["{{base_url}}"],
+							"path": ["api", "listings", "recent"]
+						}
+					}
+				},
+				{
+					"name": "Search Listings",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/api/listings/search?q=canon",
+							"host": ["{{base_url}}"],
+							"path": ["api", "listings", "search"],
+							"query": [
+								{"key": "q", "value": "canon"}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Listing by ID",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/api/listings/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "listings", "1"]
+						}
+					}
+				},
+				{
+					"name": "Create Listing",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Authorization", "value": "Bearer {{token}}"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Canon EOS R5\",\n  \"description\": \"Full frame mirrorless camera, excellent condition\",\n  \"price\": 750000,\n  \"category_id\": 1,\n  \"location\": \"Almaty\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/listings",
+							"host": ["{{base_url}}"],
+							"path": ["api", "listings"]
+						}
+					}
+				},
+				{
+					"name": "Update Listing",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Authorization", "value": "Bearer {{token}}"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Canon EOS R5 Mark II\",\n  \"price\": 800000\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/listings/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "listings", "1"]
+						}
+					}
+				},
+				{
+					"name": "Update Listing Status",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Authorization", "value": "Bearer {{token}}"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"sold\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/listings/1/status",
+							"host": ["{{base_url}}"],
+							"path": ["api", "listings", "1", "status"]
+						}
+					}
+				},
+				{
+					"name": "Delete Listing",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/listings/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "listings", "1"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Reviews",
+			"item": [
+				{
+					"name": "Get Reviews for Listing",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{review_url}}/reviews?listing_id=1",
+							"host": ["{{review_url}}"],
+							"path": ["reviews"],
+							"query": [
+								{"key": "listing_id", "value": "1"}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Review",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"listing_id\": 1,\n  \"author\": \"Arman\",\n  \"rating\": 5,\n  \"comment\": \"Great camera, works perfectly!\"\n}"
+						},
+						"url": {
+							"raw": "{{review_url}}/reviews",
+							"host": ["{{review_url}}"],
+							"path": ["reviews"]
+						}
+					}
+				}
+			]
+		}
+	]
+}
