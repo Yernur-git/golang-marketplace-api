@@ -76,13 +76,19 @@ func SetupRouter() *gin.Engine {
 		protected.GET("/me", handlers.GetMe)
 		protected.PUT("/users/profile", handlers.UpdateProfile)
 
-		protected.POST("/categories", handlers.CreateCategory)
-
 		protected.POST("/listings", handlers.CreateListing)
 		protected.PUT("/listings/:id", handlers.UpdateListing)
 		protected.PATCH("/listings/:id/status", handlers.UpdateListingStatus)
 		protected.DELETE("/listings/:id", handlers.DeleteListing)
 		protected.POST("/listings/:id/image", handlers.UploadListingImage)
+	}
+
+	admin := r.Group("/api")
+	admin.Use(middleware.AuthMiddleware(), middleware.AdminMiddleware())
+	{
+		admin.POST("/categories", handlers.CreateCategory)
+		admin.DELETE("/admin/listings/:id", handlers.AdminDeleteListing)
+		admin.GET("/admin/users", handlers.GetAllUsers)
 	}
 
 	return r
@@ -91,7 +97,7 @@ func SetupRouter() *gin.Engine {
 func main() {
 	config.ConnectDatabase()
 
-	config.DB.AutoMigrate(&models.Listing{})
+	config.DB.AutoMigrate(&models.Listing{}, &models.User{})
 
 	r := SetupRouter()
 	r.Run(":8080")

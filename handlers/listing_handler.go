@@ -160,13 +160,33 @@ func UpdateListing(c *gin.Context) {
 func DeleteListing(c *gin.Context) {
 	id := c.Param("id")
 
+	var listing models.Listing
+	if err := config.DB.First(&listing, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Listing not found"})
+		return
+	}
+
+	userID, _ := c.Get("user_id")
+	role, _ := c.Get("role")
+	if listing.UserID != userID.(uint) && role != "admin" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Not your listing"})
+		return
+	}
+
+	config.DB.Delete(&listing)
+	c.JSON(http.StatusOK, gin.H{"message": "Listing deleted successfully"})
+}
+
+func AdminDeleteListing(c *gin.Context) {
+	id := c.Param("id")
+
 	result := config.DB.Delete(&models.Listing{}, id)
 	if result.RowsAffected == 0 {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Listing not found"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Listing deleted successfully"})
+	c.JSON(http.StatusOK, gin.H{"message": "Listing deleted by admin"})
 }
 
 func SearchListings(c *gin.Context) {

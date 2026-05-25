@@ -34,6 +34,7 @@ func CreateUser(c *gin.Context) {
 		Name:         req.Name,
 		Email:        req.Email,
 		Phone:        req.Phone,
+		Role:         models.RoleUser,
 		PasswordHash: string(hashed),
 	}
 
@@ -96,6 +97,12 @@ func GetMe(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, user)
+}
+
+func GetAllUsers(c *gin.Context) {
+	var users []models.User
+	config.DB.Find(&users)
+	c.JSON(http.StatusOK, users)
 }
 
 func UpdateProfile(c *gin.Context) {
